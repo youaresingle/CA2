@@ -51,3 +51,34 @@ app.use(session({
 }));
 
 app.use(flash());
+
+app.get('/addPet', checkAuthenticated, checkAdmin, (req, res) => {
+    res.render('addPet', {user: req.session.user } ); 
+});
+
+app.post('/addPet', upload.single('image'),  (req, res) => {
+    // Extract pet data from the request body
+    const { name, dob, type, activity, notes, price} = req.body;
+    let image;
+    if (req.file) {
+        image = req.file.filename; // Save only the filename
+    } else {
+        image = null;
+    }
+
+    const sql = 'INSERT INTO pets (name, dob, type, activity, notes, price, image) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    // Insert the new pet into the database
+    connection.query(sql , [name, dob, type, activity, notes, price, image], (error, results) => {
+        if (error) {
+            // Handle any error that occurs during the database operation
+            console.error("Error adding pet:", error);
+            res.status(500).send('Error adding pet');
+        } else {
+            // Send a success response
+            res.redirect('/petCare');
+        }
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
