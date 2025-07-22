@@ -1,0 +1,1 @@
+SELECT * FROM CA2_duckmoment.pet;
